@@ -548,7 +548,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     return;
   }
   private int contentToView(long d) {
-    return Math.round(d * webView.getScale());
+    return Math.round(d * 1.0);
   }
   
   //-----------------------------------
