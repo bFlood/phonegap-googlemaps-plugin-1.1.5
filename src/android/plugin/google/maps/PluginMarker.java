@@ -162,7 +162,7 @@ public class PluginMarker extends MyPlugin {
     String id = args.getString(1);
     Marker marker = this.getMarker(id);
     marker.showInfoWindow();
-    callbackContext.success();
+    this.sendNoResult(callbackContext);
   }
 
   /**
@@ -176,7 +176,6 @@ public class PluginMarker extends MyPlugin {
     float rotation = (float)args.getDouble(2);
     String id = args.getString(1);
     this.setFloat("setRotation", id, rotation, callbackContext);
-    callbackContext.success();
   }
   
   /**
@@ -204,7 +203,7 @@ public class PluginMarker extends MyPlugin {
     LatLng position = new LatLng(args.getDouble(2), args.getDouble(3));
     Marker marker = this.getMarker(id);
     marker.setPosition(position);
-    callbackContext.success();
+    this.sendNoResult(callbackContext);
   }
   
   /**
@@ -230,6 +229,26 @@ public class PluginMarker extends MyPlugin {
     boolean visible = args.getBoolean(2);
     String id = args.getString(1);
     this.setBoolean("setVisible", id, visible, callbackContext);
+  }
+  /**
+   * @param args
+   * @param callbackContext
+   * @throws JSONException 
+   */
+  protected void setDisableAutoPan(JSONArray args, CallbackContext callbackContext) throws JSONException {
+    boolean disableAutoPan = args.getBoolean(2);
+    String id = args.getString(1);
+    Marker marker = this.getMarker(id);
+    String propertyId = "marker_property_" + marker.getId();
+    JSONObject properties = null;
+    if (this.objects.containsKey(propertyId)) {
+      properties = (JSONObject)this.objects.get(propertyId);
+    } else {
+      properties = new JSONObject();
+    }
+    properties.put("disableAutoPan", disableAutoPan);
+    this.objects.put(propertyId, properties);
+    this.sendNoResult(callbackContext);
   }
   /**
    * Set title for the marker
@@ -268,7 +287,7 @@ public class PluginMarker extends MyPlugin {
     String id = args.getString(1);
     Marker marker = this.getMarker(id);
     marker.hideInfoWindow();
-    callbackContext.success();
+    this.sendNoResult(callbackContext);
   }
 
   /**
@@ -320,10 +339,9 @@ public class PluginMarker extends MyPlugin {
     marker.remove();
     this.objects.remove(id);
     
-    String styleId = "marker_style_" + id;
-    this.objects.remove(styleId);
-    
-    callbackContext.success();
+    String propertyId = "marker_property_" + id;
+    this.objects.remove(propertyId);
+    this.sendNoResult(callbackContext);
   }
   
   /**
@@ -343,8 +361,7 @@ public class PluginMarker extends MyPlugin {
     if (imageSize != null) {
       this._setIconAnchor(marker, anchorX, anchorY, imageSize.getInt("width"), imageSize.getInt("height"));
     }
-    
-    callbackContext.success();
+    this.sendNoResult(callbackContext);
   }
   
 
@@ -365,7 +382,7 @@ public class PluginMarker extends MyPlugin {
     if (imageSize != null) {
       this._setInfoWindowAnchor(marker, anchorX, anchorY, imageSize.getInt("width"), imageSize.getInt("height"));
     }
-    callbackContext.success();
+    this.sendNoResult(callbackContext);
   }
   
   /**
@@ -419,12 +436,12 @@ public class PluginMarker extends MyPlugin {
 
         @Override
         public void onMarkerIconLoaded(Marker marker) {
-          callbackContext.success();
+          PluginMarker.this.sendNoResult(callbackContext);
         }
         
       });
     } else {
-      callbackContext.success();
+      this.sendNoResult(callbackContext);
     }
   }
   
@@ -510,44 +527,47 @@ public class PluginMarker extends MyPlugin {
 
         @Override
         public void onPostExecute(Bitmap image) {
+          int width = image.getWidth();
+          int height = image.getHeight();
+          
           if (iconProperty.containsKey("size") == true) {
               
             Bundle sizeInfo = (Bundle) iconProperty.get("size");
-            int width = sizeInfo.getInt("width", 0);
-            int height = sizeInfo.getInt("height", 0);
-            if (width > 0 && height > 0) {
+            width = sizeInfo.getInt("width", width);
+            height = sizeInfo.getInt("height", height);
+            if (width != image.getWidth() && height > image.getHeight()) {
               //width = (int)Math.round(width * webView.getScale());
               //height = (int)Math.round(height * webView.getScale());
               image = PluginUtil.resizeBitmap(image, width, height);
             }
-            
-            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(image);
-            marker.setIcon(bitmapDescriptor);
-            
-            // Save the information for the anchor property
-            Bundle imageSize = new Bundle();
-            imageSize.putInt("width", image.getWidth());
-            imageSize.putInt("height", image.getHeight());
-            PluginMarker.this.objects.put("imageSize", imageSize);
-            
-            // The `anchor` of the `icon` property
-            if (iconProperty.containsKey("anchor") == true) {
-              double[] anchor = iconProperty.getDoubleArray("anchor");
-              if (anchor.length == 2) {
-                _setIconAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
-              }
-            }
-
-            // The `anchor` property for the infoWindow
-            if (iconProperty.containsKey("infoWindowAnchor") == true) {
-              double[] anchor = iconProperty.getDoubleArray("infoWindowAnchor");
-              if (anchor.length == 2) {
-                _setInfoWindowAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
-              }
-            }
-
-            callback.onMarkerIconLoaded(marker);
           }
+            
+          BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(image);
+          marker.setIcon(bitmapDescriptor);
+          
+          // Save the information for the anchor property
+          Bundle imageSize = new Bundle();
+          imageSize.putInt("width", image.getWidth());
+          imageSize.putInt("height", image.getHeight());
+          PluginMarker.this.objects.put("imageSize", imageSize);
+          
+          // The `anchor` of the `icon` property
+          if (iconProperty.containsKey("anchor") == true) {
+            double[] anchor = iconProperty.getDoubleArray("anchor");
+            if (anchor.length == 2) {
+              _setIconAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
+            }
+          }
+
+          // The `anchor` property for the infoWindow
+          if (iconProperty.containsKey("infoWindowAnchor") == true) {
+            double[] anchor = iconProperty.getDoubleArray("infoWindowAnchor");
+            if (anchor.length == 2) {
+              _setInfoWindowAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
+            }
+          }
+
+          callback.onMarkerIconLoaded(marker);
         }
         
       }, cache);
