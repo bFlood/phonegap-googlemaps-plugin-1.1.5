@@ -75,9 +75,16 @@ public class PluginMarker extends MyPlugin {
     String id = "marker_" + marker.getId();
     this.objects.put(id, marker);
 
+    JSONObject properties = new JSONObject();
     if (opts.has("styles")) {
-      this.objects.put("marker_style_" + marker.getId(), opts.getJSONObject("styles"));
+      properties.put("styles", opts.getJSONObject("styles"));
     }
+    if (opts.has("disableAutoPan")) {
+      properties.put("disableAutoPan", opts.getBoolean("disableAutoPan"));
+    } else {
+      properties.put("disableAutoPan", false);
+    }
+    this.objects.put("marker_property_" + marker.getId(), properties);
 
     // Prepare the result
     final JSONObject result = new JSONObject();
