@@ -749,6 +749,16 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
         mapView.setLayoutParams(params);
       }
       
+      if (lParams instanceof android.widget.FrameLayout.LayoutParams) {
+            Log.i("GoogleMaps", "FrameLayout");
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) lParams;
+        params.width = divW;
+        params.height = divH;
+        params.topMargin = divTop;
+        params.leftMargin = divLeft;
+        mapView.setLayoutParams(params);
+      }      
+      
     } catch (JSONException e) {
           Log.e("GoogleMaps", "Error", e);
     }
