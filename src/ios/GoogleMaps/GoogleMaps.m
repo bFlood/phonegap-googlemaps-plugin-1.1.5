@@ -26,46 +26,8 @@
 {
   NSString *PLUGIN_VERSION = @"1.1.5";
   NSLog(@"This app uses phonegap-googlemaps-plugin version %@", PLUGIN_VERSION);
-  
-  if ([PluginUtil isInDebugMode] == NO || [PluginUtil isIOS7] == NO) {
-    return;
-  }
-  
-  BOOL isNetworkAvailable = NO;
-  Reachability *reachablity = [Reachability reachabilityForInternetConnection];
-  NetworkStatus status = [reachablity currentReachabilityStatus];
-  switch (status) {
-  case ReachableViaWiFi:
-  case ReachableViaWWAN:
-    isNetworkAvailable = YES;
-    break;
-  case NotReachable:
-    NSLog(@"[info] Can not connect to the internet");
-    break;
-  default:
-    break;
-  }
-  if (isNetworkAvailable == NO) {
-    return;
-  }
-  
-  NSURL *URL = [NSURL URLWithString:@"http://plugins.cordova.io/api/plugin.google.maps"];
-  R9HTTPRequest *request = [[R9HTTPRequest alloc] initWithURL:URL];
-  
-  [request setHTTPMethod:@"GET"];
-  [request setTimeoutInterval:5];
-  
-  [request setCompletionHandler:^(NSHTTPURLResponse *responseHeader, NSString *responseString){
-    NSData *jsonData = [responseString dataUsingEncoding:NSUTF8StringEncoding];
-    NSError *error;
-    NSMutableDictionary *info = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&error];
-    NSDictionary *distTags = [info objectForKey:@"dist-tags"];
-    NSString *latestVersion = [distTags objectForKey:@"latest"];
-    if ([PLUGIN_VERSION isEqualToString:latestVersion] == NO) {
-      NSLog(@"phonegap-googlemaps-plugin version %@ is available.", latestVersion);
-    }
-  }];
-  [request startRequest];
+  return;
+
 }
 
 /**
