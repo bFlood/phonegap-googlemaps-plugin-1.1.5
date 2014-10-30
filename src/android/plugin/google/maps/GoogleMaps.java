@@ -725,9 +725,11 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
       int divH = contentToView(mapDivLayoutJSON.getLong("height"));
       int divLeft = contentToView(mapDivLayoutJSON.getLong("left"));
       int divTop = contentToView(mapDivLayoutJSON.getLong("top"));
+      Log.i("GoogleMaps", "Rect: " + divLeft + " " + divTop + " " + divW + " " + divH);
       
       ViewGroup.LayoutParams lParams = mapView.getLayoutParams();
       if (lParams instanceof android.widget.AbsoluteLayout.LayoutParams) {
+            Log.i("GoogleMaps", "AbsoluteLayout");
         AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) lParams;
         params.width = divW;
         params.height = divH;
@@ -738,6 +740,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
       }
 
       if (lParams instanceof android.widget.LinearLayout.LayoutParams) {
+            Log.i("GoogleMaps", "LinearLayout");
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lParams;
         params.width = divW;
         params.height = divH;
@@ -746,7 +749,9 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
         mapView.setLayoutParams(params);
       }
       
-    } catch (JSONException e) {}
+    } catch (JSONException e) {
+          Log.e("GoogleMaps", "Error", e);
+    }
   }
   
   private void closeDialog(final JSONArray args, final CallbackContext callbackContext) {
