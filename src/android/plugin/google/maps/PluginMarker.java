@@ -67,6 +67,7 @@ public class PluginMarker extends MyPlugin {
     if (opts.has("opacity")) {
       markerOptions.alpha((float) opts.getDouble("opacity"));
     }
+    markerOptions.anchor(0.5f, 0.5f);
     Marker marker = map.addMarker(markerOptions);
 
     
